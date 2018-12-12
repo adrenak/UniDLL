@@ -9,7 +9,7 @@ Editor window to create DLLs from C# code in Unity easily
     - `Defines`: list of compiltation symbols for the DLL
     - `References`: list of references that must be used for compiling.
 - Click `Create`
-- The DLL is created next to your Unity Project's `Assets` folder
+- The build is stored inside the Unity Project's `Assets` folder in a folder called `<DLL Name>-build`. Any `LICENSE` and `README` files from the Unity project root are also copied there. Right-click on this folder to export a `UnityPackage`.
 
 ## More
 - https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-options/command-line-building-with-csc-exe

@@ -1,9 +1,10 @@
 ﻿using UnityEditor;
 using UnityEngine;
 using System.Linq;
+using System.IO;
 using System.Collections.Generic;
 
-namespace Adrenak.UniDLL.Ed {
+namespace Adrenak.UniDLL {
 	public class DLLCreatorWindow : EditorWindow {
 		public List<string> defines = new List<string>();
 		public List<string> references = new List<string>();
@@ -143,6 +144,8 @@ namespace Adrenak.UniDLL.Ed {
 		}
 
 		void Create() {
+			SetupDirectory();
+
 			CSC csc = new CSC() {
 				defines = defines
 				.Where(define => !string.IsNullOrEmpty(define))
@@ -157,10 +160,26 @@ namespace Adrenak.UniDLL.Ed {
 				.Select(folder => GetAssetAbsPath(folder))
 				.ToArray(),
 
-				output = GetOutputPath(dllName)
+				output = GetOutputFile()
 			};
-			Debug.Log("Running " + csc.ToCommand().Replace("/c ", ""));
 			csc.Build();
+			AssetDatabase.Refresh();
+		}
+
+		void SetupDirectory() {
+			Directory.CreateDirectory(GetOutputDirectory());
+
+			try { File.Copy(GetProjectPath() + "LICENSE", GetOutputDirectory() + "LICENSE"); } catch { }
+			try { File.Copy(GetProjectPath() + "LICENSE.md", GetOutputDirectory() + "LICENSE.md"); } catch { }
+			try { File.Copy(GetProjectPath() + "LICENSE.txt", GetOutputDirectory() + "LICENSE.txt"); } catch { }
+
+			try { File.Copy(GetProjectPath() + "README", GetOutputDirectory() + "README"); } catch { }
+			try { File.Copy(GetProjectPath() + "README.md", GetOutputDirectory() + "README.md"); } catch { }
+			try { File.Copy(GetProjectPath() + "README.txt", GetOutputDirectory() + "README.txt"); } catch { }
+		}
+
+		string GetProjectPath() {
+			return Application.dataPath.Replace("Assets", "");
 		}
 
 		string GetAssetAbsPath(Object folder) {
@@ -168,8 +187,12 @@ namespace Adrenak.UniDLL.Ed {
 			return Application.dataPath + relPath.Replace("Assets", "");
 		}
 
-		string GetOutputPath(string name) {
-			return Application.dataPath.Replace("Assets", "") + name + ".dll";
+		string GetOutputDirectory() {
+			return Application.dataPath + "\\" + dllName + "-build\\";
+		}
+
+		string GetOutputFile() {
+			return GetOutputDirectory() + "\\" + dllName + "-lib" + ".dll";
 		}
 		
 		string GetUnityDLLPath() {
