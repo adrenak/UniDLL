@@ -4,6 +4,7 @@ Editor window to create DLLs from C# code in Unity easily
 ## How to use
 - In Unity, go to `Tools/UniDLL/Dll Creator`  
 - Fill the following details 
+    - `.NET Compiler`: the version of the compiler to be used
     - `DLL Name`: the name of the DLL that is to be generated
     - `Source`: list of C# sources. Add a Folder to add all the `*.cs` files inside it recursively or add a `.cs` file to add a single source file  
     - `Defines`: list of compiltation symbols for the DLL

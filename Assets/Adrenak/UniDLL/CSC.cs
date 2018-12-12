@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using System.Diagnostics;
+using System.CodeDom.Compiler;
 
 namespace Adrenak.UniDLL {
 	public class CSC {
@@ -10,9 +11,19 @@ namespace Adrenak.UniDLL {
 		public string[] defines = new string[0];
 		public string[] recurse = new string[0];
 
+		string m_Net;
+
+		public CSC() {
+			m_Net = "csc";
+		}
+
+		public CSC(string net) {
+			m_Net = net + "\\csc.exe";
+		}
+
 		override public string ToString() {
 			var sb = new StringBuilder();
-			sb.Append("csc").Append(" ^\n");
+			sb.Append(m_Net).Append(" ^\n");
 
 			sb.Append("/target:").Append(target).Append(" ^\n");
 			sb.Append("/out:").Append("\"").Append(output.Replace("/", "\\")).Append("\" ^\n");

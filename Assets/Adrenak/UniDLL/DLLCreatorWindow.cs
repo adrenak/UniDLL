@@ -2,14 +2,18 @@
 using UnityEngine;
 using System.Linq;
 using System.IO;
+using System;
 using System.Collections.Generic;
+
+using Object = UnityEngine.Object;
 
 namespace Adrenak.UniDLL {
 	public class DLLCreatorWindow : EditorWindow {
-		public List<string> defines = new List<string>();
-		public List<string> references = new List<string>();
-		public List<Object> codes = new List<Object>();
-		public string dllName = string.Empty;
+		int netIndex = 0;
+		List<string> defines = new List<string>();
+		List<string> references = new List<string>();
+		List<Object> codes = new List<Object>();
+		string dllName = string.Empty;
 		Vector2 scrollPosition = new Vector2(0, 0);
 
 		[MenuItem("Tools/UniDLL/DLL Creator")]
@@ -25,6 +29,10 @@ namespace Adrenak.UniDLL {
 			scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
 			EditorGUILayout.BeginVertical();
 			{
+				DrawNET();
+				EditorGUILayout.Space();
+				EditorGUILayout.Space();
+				EditorGUILayout.Space();
 				DrawDLLName();
 				EditorGUILayout.Space();
 				EditorGUILayout.Space();
@@ -47,6 +55,17 @@ namespace Adrenak.UniDLL {
 			}
 			EditorGUILayout.EndVertical();
 			EditorGUILayout.EndScrollView();
+		}
+
+		void DrawNET() {
+			if (GetNETVersions().Count == 0) return;
+
+			EditorGUILayout.BeginHorizontal();
+			{
+				EditorGUILayout.LabelField(".NET Compiler");
+				netIndex = EditorGUILayout.Popup("", netIndex, GetNETVersions().ToArray());
+			}
+			EditorGUILayout.EndHorizontal();
 		}
 
 		void DrawDLLName() {
@@ -92,7 +111,6 @@ namespace Adrenak.UniDLL {
 				EditorGUILayout.LabelField("References");
 
 				if (GUILayout.Button("Add")) {
-					Debug.Log(EditorApplication.applicationPath);
 					string path = EditorUtility.OpenFilePanel("Select Reference", GetUnityDLLPath(), "*");
 					if(!string.IsNullOrEmpty(path))
 						references.Add(path);
@@ -146,7 +164,7 @@ namespace Adrenak.UniDLL {
 		void Create() {
 			SetupDirectory();
 
-			CSC csc = new CSC() {
+			CSC csc = new CSC(GetNETPaths()[netIndex]) {
 				defines = defines
 				.Where(define => !string.IsNullOrEmpty(define))
 				.ToArray(),
@@ -162,8 +180,21 @@ namespace Adrenak.UniDLL {
 
 				output = GetOutputFile()
 			};
+			Debug.Log(csc.ToCommand());
+
 			csc.Build();
 			AssetDatabase.Refresh();
+		}
+
+		List<string> GetNETVersions() {
+			return GetNETPaths().Select(x => {
+				var splits = x.Split(new char[] { '\\', '/' });
+				return splits[splits.Length - 1];
+			}).ToList();
+		}
+
+		List<string> GetNETPaths() {
+			return Environment.GetEnvironmentVariable("Path").Split(';').Where(x => x.Contains(".NET")).ToList();
 		}
 
 		void SetupDirectory() {
